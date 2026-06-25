@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order History — Legends Topup</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.history-layout { max-width: 860px; margin-inline: auto; }
+
+.order-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  transition: all var(--transition);
+  animation: fadeIn 300ms ease;
+}
+.order-card:hover { border-color: rgba(79,140,255,.35); transform: translateY(-2px); box-shadow: var(--shadow-card); }
+
+.order-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.order-game-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+.order-card-body {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  align-items: center;
+}
+@media (max-width: 767px) {
+  .order-card-body { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 479px) {
+  .order-card-body { grid-template-columns: 1fr 1fr; }
+}
+.order-meta-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
+.order-meta-value { font-size: 14px; font-weight: 600; }
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.date-inputs { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.date-inputs input[type=date] {
+  height: 40px;
+  padding-inline: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.date-inputs input[type=date]:focus { border-color: var(--primary); }
+.status-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.status-tab {
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.status-tab:hover { border-color: var(--primary); color: var(--primary); }
+.status-tab.active { background: var(--gradient-primary); border-color: transparent; color: #fff; }
+
+/* Receipt Modal */
+.receipt-modal {
+  max-width: 480px;
+}
+</style>
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- RECEIPT MODAL -->
+<div class="modal-overlay" id="receiptModal">
+  <div class="modal receipt-modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">📄 Order Receipt</div>
+    <div class="modal-subtitle" id="modalOrderId">Order #LT2024001234</div>
+    <div id="modalContent">
+      <div class="receipt-body" style="padding:0">
+        <div class="receipt-row"><span class="label">Game</span><span class="value" id="mGame">—</span></div>
+        <div class="receipt-row"><span class="label">Player</span><span class="value">Hero123 · #456789123</span></div>
+        <div class="receipt-row"><span class="label">Package</span><span class="value" id="mPkg">—</span></div>
+        <div class="receipt-row"><span class="label">Amount</span><span class="value text-accent" id="mAmt">—</span></div>
+        <div class="receipt-row"><span class="label">Date</span><span class="value" id="mDate">—</span></div>
+        <div class="receipt-row"><span class="label">Payment</span><span class="value" id="mPay">—</span></div>
+        <div class="receipt-row"><span class="label">Status</span><span id="mStatus">—</span></div>
+      </div>
+    </div>
+    <div style="display:flex; gap:12px; margin-top:24px">
+      <button class="btn btn-ghost flex-1" onclick="handleShare('download')">⬇️ Download</button>
+      <button class="btn btn-primary flex-1" onclick="closeModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="nav-logo">⚡ Legends Topup</a>
+    <div class="nav-links">
+      <a href="games.html">Games</a>
+      <a href="index.html#promotions">Promotions</a>
+      <a href="history.html" class="active">History</a>
+      <a href="index.html#vip">VIP</a>
+    </div>
+    <div class="nav-actions">
+      <a href="#" class="nav-login">Login</a>
+      <a href="games.html" class="btn btn-primary btn-sm">⚡ Top Up Now</a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+<div class="nav-drawer" id="navDrawer">
+  <a href="games.html">🎮 Games</a>
+  <a href="index.html#promotions">🔥 Promotions</a>
+  <a href="history.html">📋 History</a>
+  <a href="index.html#vip">🏆 VIP</a>
+  <a href="#" class="btn btn-ghost">Login</a>
+  <a href="games.html" class="btn btn-primary">⚡ Top Up Now</a>
+</div>
+
+<!-- ══ PAGE HERO ══ -->
+<div class="page-hero">
+  <div class="container">
+    <h1 style="margin-bottom:12px">📋 Order <span class="text-gradient">History</span></h1>
+    <p>Track, review, and download receipts for all your top-ups</p>
+    <!-- Summary stats -->
+    <div style="display:flex; gap:32px; justify-content:center; margin-top:28px; flex-wrap:wrap">
+      <div style="text-align:center">
+        <div style="font-size:28px; font-weight:800; color:var(--text)">24</div>
+        <div style="font-size:13px; color:var(--text-muted)">Total Orders</div>
+      </div>
+      <div style="width:1px; background:var(--border)"></div>
+      <div style="text-align:center">
+        <div style="font-size:28px; font-weight:800; color:var(--accent)">฿3,842</div>
+        <div style="font-size:13px; color:var(--text-muted)">Total Spent</div>
+      </div>
+      <div style="width:1px; background:var(--border)"></div>
+      <div style="text-align:center">
+        <div style="font-size:28px; font-weight:800; color:var(--success)">฿76.84</div>
+        <div style="font-size:13px; color:var(--text-muted)">VIP Savings</div>
+      </div>
+      <div style="width:1px; background:var(--border)"></div>
+      <div style="text-align:center">
+        <div style="font-size:28px; font-weight:800; color:var(--primary)">3,842</div>
+        <div style="font-size:13px; color:var(--text-muted)">LT Points</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="section" style="padding-top:40px">
+  <div class="container">
+    <div class="history-layout">
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <!-- Search -->
+        <div class="input-wrapper" style="flex:1; min-width:200px; max-width:320px;">
+          <span class="input-icon">🔍</span>
+          <input type="text" class="input" placeholder="Search orders..." id="orderSearch" style="height:40px; font-size:13px;" oninput="filterOrders()">
+        </div>
+
+        <!-- Date range -->
+        <div class="date-inputs">
+          <input type="date" id="dateFrom" value="2024-01-01" onchange="filterOrders()">
+          <span style="color:var(--text-muted); font-size:13px">to</span>
+          <input type="date" id="dateTo" value="2024-12-31" onchange="filterOrders()">
+        </div>
+
+        <button class="btn btn-ghost btn-sm" onclick="clearFilters()">✕ Clear</button>
+      </div>
+
+      <!-- STATUS TABS -->
+      <div class="status-tabs" style="margin-bottom:24px" id="statusTabs">
+        <button class="status-tab active" data-status="all" onclick="setStatus(this)">🎮 All (5)</button>
+        <button class="status-tab" data-status="completed" onclick="setStatus(this)">✅ Completed (3)</button>
+        <button class="status-tab" data-status="processing" onclick="setStatus(this)">⚙️ Processing (1)</button>
+        <button class="status-tab" data-status="failed" onclick="setStatus(this)">❌ Failed (1)</button>
+      </div>
+
+      <!-- ORDERS LIST -->
+      <div id="ordersList">
+
+        <!-- Order 1 -->
+        <div class="order-card" data-status="completed" data-game="Mobile Legends" data-date="2024-12-20">
+          <div class="order-card-header">
+            <div class="order-game-icon cover-ml">⚔️</div>
+            <div style="flex:1">
+              <div style="font-weight:700; font-size:15px; margin-bottom:4px">Mobile Legends: Bang Bang</div>
+              <div style="font-size:13px; color:var(--text-muted)">#LT2024001234 · 20 Dec 2024, 14:32</div>
+            </div>
+            <span class="badge status-completed">✅ Completed</span>
+          </div>
+          <div class="order-card-body">
+            <div>
+              <div class="order-meta-label">Package</div>
+              <div class="order-meta-value">706 💎 Diamonds</div>
+            </div>
+            <div>
+              <div class="order-meta-label">Player</div>
+              <div class="order-meta-value">Hero123</div>
+            </div>
+            <div>
+              <div class="order-meta-label">Amount</div>
+              <div class="order-meta-value" style="color:var(--accent)">฿234.22</div>
+            </div>
+            <div style="text-align:right">
+              <button class="btn btn-ghost btn-sm" onclick="viewReceipt({id:'LT2024001234', game:'Mobile Legends: Bang Bang', pkg:'706 💎 Diamonds', amt:'฿234.22', date:'20 Dec 2024, 14:32', pay:'💚 TrueMoney', status:'completed'})">
+                📄 Receipt
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order 2 -->
+        <div class="order-card" data-status="completed" data-game="Genshin Impact" data-date="2024-12-18">
+          <div class="order-card-header">
+            <div class="order-game-icon cover-gi">🌸</div>
+            <div style="flex:1">
+              <div style="font-weight:700; font-size:15px; margin-bottom:4px">Genshin Impact</div>
+              <div style="font-size:13px; color:var(--text-muted)">#LT2024001198 · 18 Dec 2024, 09:17</div>
+            </div>
+            <span class="badge status-completed">✅ Completed</span>
+          </div>
+          <div class="order-card-body">
+            <div>
+              <div class="order-meta-label">Package</div>
+              <div class="order-meta-value">6480 Genesis Crystals</div>
+            </div>
+            <div>
+              <div class="order-meta-label">Player</div>
+              <div class="order-meta-value">StarKnight</div>
+            </div>
+            <div>
+              <div class="order-meta-label">Amount</div>
+              <div class="order-meta-value" style="color:var(--accent)">฿1,349.00</div>
+            </div>
+            <div style="text-align:right">
+              <button class="btn btn-ghost btn-sm" onclick="viewReceipt({id:'LT2024001198', game:'Genshin Impact', pkg:'6480 Genesis Crystals', amt:'฿1,349.00', date:'18 Dec 2024, 09:17', pay:'💳 Credit Card', status:'completed'})">
+                📄 Receipt
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order 3 — Processing -->
+        <div class="order-card" data-status="processing" data-game="PUBG Mobile" data-date="2024-12-20">
+          <div class="order-card-header">
+            <div class="order-game-icon cover-pubg">🔫</div>
+            <div style="flex:1">
+              <div style="font-weight:700; font-size:15px; margin-bottom:4px">PUBG Mobile</div>
+              <div style="font-size:13px; color:var(--text-muted)">#LT2024001236 · 20 Dec 2024, 16:45</div>
+            </div>
+            <span class="badge status-processing">⚙️ Processing</span>
+          </div>
+          <div class="order-card-body">
+            <div>
+              <div class="order-meta-label">Package</div>
+              <div class="order-meta-value">1800 UC Bundle</div>
+            </div>
+            <div>
+              <div class="order-meta-label">Player</div>
+              <div class="order-meta-value">NinjaX99</div>
+            </div>
+            <div>
+              <div class="order-meta-label">Amount</div>
+              <div class="order-meta-value" style="color:var(--accent)">฿599.00</div>
+            </div>
+            <div style="text-align:right">
+              <a href="processing.html" class="btn btn-secondary btn-sm">
+                ⏳ Track
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order 4 — Completed -->
+        <div class="order-card" data-status="completed" data-game="Free Fire" data-date="2024-12-15">
+          <div class="order-card-header">
+            <div class="order-game-icon cover-ff">🔥</div>
+            <div style="flex:1">
+              <div style="font-weight:700; font-size:15px; margin-bottom:4px">Free Fire MAX</div>
+              <div style="font-size:13px; color:var(--text-muted)">#LT2024001145 · 15 Dec 2024, 11:08</div>
+            </div>
+            <span class="badge status-completed">✅ Completed</span>
+          </div>
+          <div class="order-card-body">
+            <div>
+              <div class="order-meta-label">Package</div>
+              <div class="order-meta-value">1080 💎 Diamonds</div>
+            </div>
+            <div>
+              <div class="order-meta-label">Player</div>
+              <div class="order-meta-value">QueenBlade</div>
+            </div>
+            <div>
+              <div class="order-meta-label">Amount</div>
+              <div class="order-meta-value" style="color:var(--accent)">฿319.00</div>
+            </div>
+            <div style="text-align:right">
+              <button class="btn btn-ghost btn-sm" onclick="viewReceipt({id:'LT2024001145', game:'Free Fire MAX', pkg:'1080 💎 Diamonds', amt:'฿319.00', date:'15 Dec 2024, 11:08', pay:'📱 PromptPay', status:'completed'})">
+                📄 Receipt
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order 5 — Failed -->
+        <div class="order-card" data-status="failed" data-game="Valorant" data-date="2024-12-10">
+          <div class="order-card-header">
+            <div class="order-game-icon cover-val">🎯</div>
+            <div style="flex:1">
+              <div style="font-weight:700; font-size:15px; margin-bottom:4px">Valorant</div>
+              <div style="font-size:13px; color:var(--text-muted)">#LT2024001089 · 10 Dec 2024, 19:22</div>
+            </div>
+            <span class="badge status-failed">❌ Failed</span>
+          </div>
+          <div class="order-card-body">
+            <div>
+              <div class="order-meta-label">Package</div>
+              <div class="order-meta-value">2050 VP</div>
+            </div>
+            <div>
+              <div class="order-meta-label">Reason</div>
+              <div class="order-meta-value" style="color:var(--error); font-size:12px">Payment declined</div>
+            </div>
+            <div>
+              <div class="order-meta-label">Amount</div>
+              <div class="order-meta-value" style="color:var(--text-muted); text-decoration:line-through">฿179.00</div>
+            </div>
+            <div style="text-align:right; display:flex; flex-direction:column; gap:6px; align-items:flex-end">
+              <a href="game-detail.html" class="btn btn-danger btn-sm">🔄 Retry</a>
+            </div>
+          </div>
+          <div style="margin-top:12px; padding:10px 14px; background:rgba(239,68,68,.07); border:1px solid rgba(239,68,68,.2); border-radius:var(--radius-sm); font-size:13px; color:var(--error)">
+            ⚠️ Your payment was declined. A full refund of ฿179.00 was issued within 3 business days. <a href="#" style="color:var(--primary)">Contact support →</a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- EMPTY STATE (hidden) -->
+      <div class="empty-state" id="emptyState" style="display:none">
+        <svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="80" cy="80" r="70" fill="rgba(79,140,255,0.06)" stroke="rgba(79,140,255,0.15)" stroke-width="1.5" stroke-dasharray="8 6"/>
+          <!-- Mascot holding box -->
+          <text x="80" y="65" text-anchor="middle" font-size="40">📋</text>
+          <text x="80" y="105" text-anchor="middle" font-size="28">😢</text>
+          <!-- Stars -->
+          <text x="30" y="40" font-size="16" opacity=".4" style="animation:starTwinkle 2s infinite">⭐</text>
+          <text x="125" y="45" font-size="12" opacity=".4" style="animation:starTwinkle 2.5s infinite .5s">✨</text>
+          <text x="20" y="110" font-size="10" opacity=".3" style="animation:starTwinkle 1.8s infinite 1s">💫</text>
+        </svg>
+        <div class="empty-title">No orders found</div>
+        <div class="empty-desc">Try adjusting your search or filters. Your completed orders will appear here.</div>
+        <a href="games.html" class="btn btn-primary">🎮 Start Your First Top Up</a>
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="pagination" style="margin-top:32px" id="pagination">
+        <button class="page-btn" disabled>‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn" onclick="goPage(2)">2</button>
+        <button class="page-btn" onclick="goPage(3)">3</button>
+        <button class="page-btn" onclick="goPage(2)">›</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo text-gradient">⚡ Legends Topup</div>
+        <div class="footer-tagline">Thailand's #1 premium game top-up platform. Instant delivery, best prices, 24/7 support.</div>
+        <div class="footer-socials">
+          <a href="#" class="social-btn">𝐟</a>
+          <a href="#" class="social-btn">🟩</a>
+          <a href="#" class="social-btn">💬</a>
+          <a href="#" class="social-btn">𝕏</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Quick Links</div>
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="games.html">All Games</a>
+          <a href="history.html">My Orders</a>
+          <a href="index.html#vip">VIP Program</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Support</div>
+        <div class="footer-links">
+          <a href="#">Help Center</a>
+          <a href="#">Live Chat</a>
+          <a href="#">Contact Us</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <div class="footer-links">
+          <a href="#">About Us</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2024 Legends Topup. All rights reserved.</div>
+      <div class="payment-badges">
+        <div class="payment-badge">PromptPay</div>
+        <div class="payment-badge">VISA</div>
+        <div class="payment-badge">Mastercard</div>
+        <div class="payment-badge">PayPal</div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Hamburger
+const hamburger = document.getElementById('hamburger');
+const navDrawer = document.getElementById('navDrawer');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('open');
+  navDrawer.classList.toggle('open');
+});
+
+// Status filter
+let currentStatus = 'all';
+function setStatus(btn) {
+  document.querySelectorAll('.status-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentStatus = btn.dataset.status;
+  filterOrders();
+}
+
+function filterOrders() {
+  const search = document.getElementById('orderSearch').value.toLowerCase();
+  const cards = document.querySelectorAll('#ordersList .order-card');
+  let visible = 0;
+
+  cards.forEach(card => {
+    const status = card.dataset.status;
+    const game = card.dataset.game?.toLowerCase() || '';
+    const cardText = card.textContent.toLowerCase();
+
+    const matchStatus = currentStatus === 'all' || status === currentStatus;
+    const matchSearch = !search || game.includes(search) || cardText.includes(search);
+
+    if (matchStatus && matchSearch) {
+      card.style.display = '';
+      visible++;
+    } else {
+      card.style.display = 'none';
+    }
+  });
+
+  document.getElementById('emptyState').style.display = visible === 0 ? 'flex' : 'none';
+  document.getElementById('pagination').style.display = visible === 0 ? 'none' : 'flex';
+}
+
+function clearFilters() {
+  document.getElementById('orderSearch').value = '';
+  currentStatus = 'all';
+  document.querySelectorAll('.status-tab').forEach(b => b.classList.remove('active'));
+  document.querySelector('.status-tab[data-status="all"]').classList.add('active');
+  filterOrders();
+}
+
+// View Receipt Modal
+function viewReceipt(data) {
+  document.getElementById('modalOrderId').textContent = 'Order #' + data.id;
+  document.getElementById('mGame').textContent = data.game;
+  document.getElementById('mPkg').textContent = data.pkg;
+  document.getElementById('mAmt').textContent = data.amt;
+  document.getElementById('mDate').textContent = data.date;
+  document.getElementById('mPay').textContent = data.pay;
+  const statusMap = {
+    completed: '<span class="badge status-completed">✅ Completed</span>',
+    processing: '<span class="badge status-processing">⚙️ Processing</span>',
+    failed: '<span class="badge status-failed">❌ Failed</span>'
+  };
+  document.getElementById('mStatus').innerHTML = statusMap[data.status] || data.status;
+  document.getElementById('receiptModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('receiptModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('receiptModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function goPage(n) {
+  showToast(`Loaded page ${n}`, 'info');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function handleShare(action) {
+  showToast('⬇️ PDF download started...', 'info');
+  closeModal();
+}
+
+// Toast
+function showToast(msg, type = 'info', title = '') {
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><div class="toast-content">${title ? `<div class="toast-title">${title}</div>` : ''}<div class="toast-msg">${msg}</div></div><button class="toast-close" onclick="this.closest('.toast').remove()">✕</button>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+</script>
+</body>
+</html>

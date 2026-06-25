@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Deal7420NotHag\\\\Desktop\\\\UX-UI\\\\legends-topup\" | Select-Object Name, @{N='Size';E={\"{0:N0} KB\" -f \\($_.Length/1KB\\)}} | Format-Table -AutoSize)"
+    ]
+  }
+}

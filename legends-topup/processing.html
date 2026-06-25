@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Processing Order — Legends Topup</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.processing-main {
+  min-height: calc(100vh - var(--nav-h) - 200px);
+  display: flex;
+  align-items: center;
+  padding-block: 60px;
+}
+.order-card-wrap {
+  max-width: 600px;
+  margin-inline: auto;
+  width: 100%;
+}
+.status-banner {
+  background: var(--gradient-primary);
+  border-radius: 24px;
+  padding: 40px 32px;
+  text-align: center;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+}
+.status-banner::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 160px; height: 160px;
+  background: rgba(255,255,255,.08);
+  border-radius: 50%;
+}
+.status-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -50px; left: -20px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,.05);
+  border-radius: 50%;
+}
+.pulse-ring {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+}
+.pulse-ring::before, .pulse-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.5);
+  animation: pulseRing 2s infinite;
+}
+.pulse-ring::after { animation-delay: .6s; }
+.pulse-inner {
+  position: absolute;
+  inset: 10px;
+  background: rgba(255,255,255,.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  animation: pulseDot 1.5s ease-in-out infinite;
+}
+@keyframes pulseRing {
+  0% { transform: scale(.8); opacity: 1; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.timeline-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 20px;
+}
+.summary-mini {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.summary-mini-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.summary-mini-row:last-child { border-bottom: none; }
+.summary-mini-row .label { color: var(--text-muted); }
+.summary-mini-row .value { font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="nav-logo">⚡ Legends Topup</a>
+    <div class="nav-links">
+      <a href="games.html">Games</a>
+      <a href="index.html#promotions">Promotions</a>
+      <a href="history.html">History</a>
+      <a href="index.html#vip">VIP</a>
+    </div>
+    <div class="nav-actions">
+      <a href="#" class="nav-login">Login</a>
+      <a href="games.html" class="btn btn-primary btn-sm">⚡ Top Up Now</a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+<div class="nav-drawer" id="navDrawer">
+  <a href="games.html">🎮 Games</a>
+  <a href="index.html#promotions">🔥 Promotions</a>
+  <a href="history.html">📋 History</a>
+  <a href="index.html#vip">🏆 VIP</a>
+  <a href="#" class="btn btn-ghost">Login</a>
+  <a href="games.html" class="btn btn-primary">⚡ Top Up Now</a>
+</div>
+
+<!-- ══ STEPPER ══ -->
+<div style="background:var(--surface); border-bottom:1px solid var(--border); padding-block:20px">
+  <div class="container">
+    <div class="stepper">
+      <div class="step done"><div class="step-circle">✓</div><div class="step-info"><div class="step-label">Game</div></div><div class="step-line done"></div></div>
+      <div class="step done"><div class="step-circle">✓</div><div class="step-info"><div class="step-label">Package</div></div><div class="step-line done"></div></div>
+      <div class="step done"><div class="step-circle">✓</div><div class="step-info"><div class="step-label">Payment</div></div><div class="step-line done"></div></div>
+      <div class="step active"><div class="step-circle">4</div><div class="step-info"><div class="step-label">Delivering</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="processing-main">
+  <div class="container">
+    <div class="order-card-wrap">
+
+      <!-- STATUS BANNER -->
+      <div class="status-banner">
+        <div class="pulse-ring">
+          <div class="pulse-inner">⚡</div>
+        </div>
+        <div class="order-id-badge">Order #LT2024001234</div>
+        <h2 style="color:#fff; margin-bottom:8px">Processing Your Order</h2>
+        <div class="eta-text">Estimated delivery in <strong>3–5 minutes</strong></div>
+        <div style="margin-top:16px; font-size:13px; color:rgba(255,255,255,.7)">
+          Payment confirmed via TrueMoney Wallet · ฿234.22
+        </div>
+      </div>
+
+      <!-- TIMELINE -->
+      <div class="timeline-card">
+        <h4 style="margin-bottom:24px">📊 Order Status</h4>
+        <div class="timeline">
+
+          <!-- Step 1: Order Received -->
+          <div class="timeline-item">
+            <div class="timeline-marker">
+              <div class="timeline-dot done">✅</div>
+              <div class="timeline-line done"></div>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-title">Order Received</div>
+              <div class="timeline-subtitle" id="ts1">Today, <span id="t1"></span></div>
+            </div>
+          </div>
+
+          <!-- Step 2: Payment Verified -->
+          <div class="timeline-item">
+            <div class="timeline-marker">
+              <div class="timeline-dot done">✅</div>
+              <div class="timeline-line done"></div>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-title">Payment Verified</div>
+              <div class="timeline-subtitle">TrueMoney Wallet · ฿234.22 confirmed</div>
+            </div>
+          </div>
+
+          <!-- Step 3: Processing (active) -->
+          <div class="timeline-item">
+            <div class="timeline-marker">
+              <div class="timeline-dot active">⚙️</div>
+              <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-title" style="color:var(--primary)">Processing</div>
+              <div class="timeline-subtitle">Connecting to game server and crediting diamonds...</div>
+              <div style="margin-top:8px">
+                <div style="height:4px; background:var(--surface-2); border-radius:4px; overflow:hidden;">
+                  <div id="progressBar" style="height:100%; background:var(--gradient-primary); border-radius:4px; width:0%; transition:width 200ms ease;"></div>
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:4px" id="progressLabel">Initializing...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: Delivering -->
+          <div class="timeline-item" id="step4item">
+            <div class="timeline-marker">
+              <div class="timeline-dot pending" id="dot4">📦</div>
+              <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-title" id="title4" style="color:var(--text-muted)">Delivering to Account</div>
+              <div class="timeline-subtitle">Waiting for game server confirmation</div>
+            </div>
+          </div>
+
+          <!-- Step 5: Completed -->
+          <div class="timeline-item" id="step5item">
+            <div class="timeline-marker">
+              <div class="timeline-dot pending" id="dot5">🏁</div>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-title" id="title5" style="color:var(--text-muted)">Completed</div>
+              <div class="timeline-subtitle">Diamonds credited to your account</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- AUTO REFRESH INDICATOR -->
+      <div style="display:flex; align-items:center; justify-content:center; gap:10px; font-size:13px; color:var(--text-muted); margin-bottom:20px" id="refreshIndicator">
+        <div class="spin-dot" style="animation:pulseDot 1s infinite"></div>
+        Auto-refreshing in <span id="refreshTimer" style="color:var(--primary); font-weight:700">15</span>s
+      </div>
+
+      <!-- ORDER SUMMARY MINI -->
+      <div class="summary-mini">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px">
+          <div style="width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px;" class="cover-ml">⚔️</div>
+          <div>
+            <div style="font-weight:700">Mobile Legends: Bang Bang</div>
+            <div style="font-size:12px; color:var(--text-muted)">MOBA · Global</div>
+          </div>
+          <div class="badge badge-success" style="margin-left:auto">⚡ Instant</div>
+        </div>
+        <div class="summary-mini-row"><span class="label">Player</span><span class="value">Hero123 · #456789123</span></div>
+        <div class="summary-mini-row"><span class="label">Package</span><span class="value">706 💎 Diamonds</span></div>
+        <div class="summary-mini-row"><span class="label">Amount Paid</span><span class="value text-accent">฿234.22</span></div>
+        <div class="summary-mini-row"><span class="label">Payment Method</span><span class="value">💚 TrueMoney Wallet</span></div>
+        <div class="summary-mini-row"><span class="label">LT Points Earned</span><span class="value" style="color:var(--primary)">+239 pts 🏆</span></div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div style="display:flex; flex-direction:column; gap:12px">
+        <!-- Check Status button (appears after 5s) -->
+        <a href="success.html" class="btn btn-primary btn-lg w-full" id="checkStatusBtn" style="display:none">
+          ✅ View Order Complete
+        </a>
+
+        <div style="display:flex; gap:12px">
+          <a href="history.html" class="btn btn-ghost flex-1">📋 My Orders</a>
+          <button class="btn btn-ghost flex-1" onclick="showToast('Our support team is ready to help!', 'info', '🎧 Support')">
+            🎧 Get Help
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// Hamburger
+const hamburger = document.getElementById('hamburger');
+const navDrawer = document.getElementById('navDrawer');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('open');
+  navDrawer.classList.toggle('open');
+});
+
+// Timestamp
+function formatTime(d) {
+  return d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+document.getElementById('t1').textContent = formatTime(new Date());
+
+// Progress bar animation
+const progressBar = document.getElementById('progressBar');
+const progressLabel = document.getElementById('progressLabel');
+const stages = [
+  { pct: 15, label: 'Initializing connection...' },
+  { pct: 35, label: 'Verifying player account...' },
+  { pct: 55, label: 'Connecting to game server...' },
+  { pct: 75, label: 'Crediting 706 💎 diamonds...' },
+  { pct: 90, label: 'Waiting for confirmation...' },
+  { pct: 100, label: 'Delivery complete!' }
+];
+let stageIdx = 0;
+function advanceProgress() {
+  if (stageIdx >= stages.length) return;
+  const s = stages[stageIdx++];
+  progressBar.style.width = s.pct + '%';
+  progressLabel.textContent = s.label;
+  if (stageIdx < stages.length) {
+    setTimeout(advanceProgress, 600 + Math.random() * 400);
+  }
+}
+setTimeout(advanceProgress, 300);
+
+// Refresh countdown
+let refreshSec = 15;
+const refreshTimerEl = document.getElementById('refreshTimer');
+function refreshTick() {
+  if (refreshSec <= 0) {
+    refreshTimerEl.textContent = '...';
+    document.getElementById('refreshIndicator').innerHTML = '<div class="spin-dot" style="animation:pulseDot 1s infinite"></div> Refreshing status...';
+    setTimeout(() => {
+      refreshSec = 15;
+      document.getElementById('refreshIndicator').innerHTML = `<div class="spin-dot" style="animation:pulseDot 1s infinite"></div> Auto-refreshing in <span id="refreshTimer" style="color:var(--primary); font-weight:700">15</span>s`;
+      startRefreshTimer();
+    }, 1500);
+    return;
+  }
+  refreshTimerEl.textContent = refreshSec--;
+  setTimeout(refreshTick, 1000);
+}
+function startRefreshTimer() {
+  const el = document.getElementById('refreshTimer');
+  if (!el) return;
+  setTimeout(refreshTick, 1000);
+}
+startRefreshTimer();
+
+// Show Check Status button after 5 seconds
+setTimeout(() => {
+  document.getElementById('checkStatusBtn').style.display = 'flex';
+  document.getElementById('dot4').textContent = '📦';
+  document.getElementById('dot4').className = 'timeline-dot active';
+  document.getElementById('title4').style.color = 'var(--primary)';
+  showToast('Your order is almost ready! 🎉', 'success', '⚡ Delivery in progress');
+}, 5000);
+
+// After 10s show complete
+setTimeout(() => {
+  document.getElementById('dot4').textContent = '✅';
+  document.getElementById('dot4').className = 'timeline-dot done';
+  document.getElementById('title4').style.color = '';
+  document.getElementById('dot5').textContent = '✅';
+  document.getElementById('dot5').className = 'timeline-dot done';
+  document.getElementById('title5').style.color = 'var(--success)';
+  document.getElementById('title5').textContent = 'Completed!';
+  document.getElementById('checkStatusBtn').textContent = '🎉 View Success Receipt';
+  document.getElementById('checkStatusBtn').href = 'success.html';
+}, 10000);
+
+// Toast
+function showToast(msg, type = 'info', title = '') {
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><div class="toast-content">${title ? `<div class="toast-title">${title}</div>` : ''}<div class="toast-msg">${msg}</div></div><button class="toast-close" onclick="this.closest('.toast').remove()">✕</button>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+</script>
+</body>
+</html>

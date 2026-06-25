@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Games — Legends Topup</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.games-page-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+@media (max-width: 1023px) {
+  .games-page-layout { grid-template-columns: 1fr; }
+  .filter-sidebar { display: none; }
+  .filter-sidebar.open { display: block; }
+}
+.game-grid-12 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+@media (max-width: 1200px) { .game-grid-12 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 599px) { .game-grid-12 { grid-template-columns: 1fr 1fr; gap: 12px; } }
+.sort-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.mobile-filter-btn {
+  display: none;
+}
+@media (max-width: 1023px) {
+  .mobile-filter-btn { display: flex; }
+}
+.filter-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.7);
+  z-index: 200;
+  backdrop-filter: blur(4px);
+}
+.filter-modal-overlay.open { display: flex; align-items: flex-end; }
+.filter-modal-panel {
+  background: var(--surface);
+  width: 100%;
+  border-radius: 24px 24px 0 0;
+  padding: 24px;
+  max-height: 80vh;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+}
+.filter-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+</style>
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="nav-logo">⚡ Legends Topup</a>
+    <div class="nav-links">
+      <a href="games.html" class="active">Games</a>
+      <a href="index.html#promotions">Promotions</a>
+      <a href="history.html">History</a>
+      <a href="index.html#vip">VIP</a>
+    </div>
+    <div class="nav-actions">
+      <a href="#" class="nav-login">Login</a>
+      <a href="games.html" class="btn btn-primary btn-sm">⚡ Top Up Now</a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+<div class="nav-drawer" id="navDrawer">
+  <a href="games.html">🎮 Games</a>
+  <a href="index.html#promotions">🔥 Promotions</a>
+  <a href="history.html">📋 History</a>
+  <a href="index.html#vip">🏆 VIP</a>
+  <a href="#" class="btn btn-ghost">Login</a>
+  <a href="games.html" class="btn btn-primary">⚡ Top Up Now</a>
+</div>
+
+<!-- ══ PAGE HERO ══ -->
+<div class="page-hero">
+  <div class="container">
+    <div class="badge badge-primary" style="margin-bottom:12px; display:inline-flex">🎮 100+ Games Available</div>
+    <h1 style="margin-bottom:12px">All <span class="text-gradient">Games</span></h1>
+    <p style="max-width:480px; margin-inline:auto">Find and top up your favorite games instantly. Diamonds, UC, VP, Crystals — all at the best prices.</p>
+  </div>
+</div>
+
+<!-- ══ CATEGORY TABS ══ -->
+<div style="background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:var(--nav-h); z-index:90;">
+  <div class="container">
+    <div class="tabs-scroll">
+      <div class="tabs" id="catTabs">
+        <button class="tab-btn active" data-cat="all">🎮 All</button>
+        <button class="tab-btn" data-cat="moba">⚔️ MOBA</button>
+        <button class="tab-btn" data-cat="fps">🔫 FPS</button>
+        <button class="tab-btn" data-cat="rpg">🗡️ RPG</button>
+        <button class="tab-btn" data-cat="mmorpg">🌍 MMORPG</button>
+        <button class="tab-btn" data-cat="br">💥 Battle Royale</button>
+        <button class="tab-btn" data-cat="anime">🎌 Anime</button>
+        <button class="tab-btn" data-cat="gift">🎁 Gift Card</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN CONTENT ══ -->
+<section class="section">
+  <div class="container">
+    <div class="games-page-layout">
+
+      <!-- FILTER SIDEBAR -->
+      <aside class="filter-sidebar">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+          <h5>🔧 Filters</h5>
+          <button class="btn btn-ghost btn-sm" onclick="clearFilters()">Clear All</button>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-title">Category</div>
+          <label class="checkbox-item"><input type="checkbox" checked> <label>MOBA</label></label>
+          <label class="checkbox-item"><input type="checkbox" checked> <label>FPS / Shooter</label></label>
+          <label class="checkbox-item"><input type="checkbox"> <label>RPG</label></label>
+          <label class="checkbox-item"><input type="checkbox"> <label>Battle Royale</label></label>
+          <label class="checkbox-item"><input type="checkbox"> <label>MMORPG</label></label>
+          <label class="checkbox-item"><input type="checkbox"> <label>Anime</label></label>
+          <label class="checkbox-item"><input type="checkbox"> <label>Sports</label></label>
+          <label class="checkbox-item"><input type="checkbox"> <label>Gift Card</label></label>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-title">Region</div>
+          <label class="checkbox-item"><input type="checkbox" checked> <label>Global</label></label>
+          <label class="checkbox-item"><input type="checkbox" checked> <label>SEA / Thailand</label></label>
+          <label class="checkbox-item"><input type="checkbox"> <label>North America</label></label>
+          <label class="checkbox-item"><input type="checkbox"> <label>Europe</label></label>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-title">Price Range</div>
+          <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--text-muted); margin-bottom:8px;">
+            <span>฿0</span><span id="priceLabel">฿500</span><span>฿5,000</span>
+          </div>
+          <input type="range" class="range-input" min="0" max="5000" value="500" id="priceRange" oninput="document.getElementById('priceLabel').textContent='฿'+this.value">
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-title">Availability</div>
+          <label class="checkbox-item"><input type="checkbox" checked> <label>⚡ Instant Delivery</label></label>
+          <label class="checkbox-item"><input type="checkbox"> <label>🔥 On Sale</label></label>
+          <label class="checkbox-item"><input type="checkbox"> <label>⭐ Top Rated</label></label>
+        </div>
+
+        <button class="btn btn-primary w-full" onclick="applyFilters()">Apply Filters</button>
+      </aside>
+
+      <!-- GAME CONTENT -->
+      <div>
+        <!-- Sort bar -->
+        <div class="sort-bar">
+          <div class="input-wrapper" style="flex:1; max-width:320px;">
+            <span class="input-icon">🔍</span>
+            <input type="text" class="input" placeholder="Search games..." id="gameSearch" oninput="filterGames()">
+          </div>
+          <select class="input" style="width:auto; flex-shrink:0" id="sortSelect" onchange="filterGames()">
+            <option value="popular">Most Popular</option>
+            <option value="newest">Newest</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="rating">Top Rated</option>
+          </select>
+          <button class="btn btn-ghost btn-sm mobile-filter-btn" onclick="openFilterModal()">
+            🔧 Filters
+          </button>
+        </div>
+
+        <div style="font-size:14px; color:var(--text-muted); margin-bottom:16px;" id="resultsCount">Showing 12 of 100+ games</div>
+
+        <!-- Skeleton -->
+        <div class="game-grid-12" id="skeletonGrid">
+          <div class="skeleton skeleton-card"><div class="skeleton-cover skeleton"></div><div class="skeleton-body"><div class="skeleton-line skeleton w-80"></div><div class="skeleton-line skeleton w-50"></div></div></div>
+          <div class="skeleton skeleton-card"><div class="skeleton-cover skeleton"></div><div class="skeleton-body"><div class="skeleton-line skeleton w-80"></div><div class="skeleton-line skeleton w-50"></div></div></div>
+          <div class="skeleton skeleton-card"><div class="skeleton-cover skeleton"></div><div class="skeleton-body"><div class="skeleton-line skeleton w-80"></div><div class="skeleton-line skeleton w-50"></div></div></div>
+          <div class="skeleton skeleton-card"><div class="skeleton-cover skeleton"></div><div class="skeleton-body"><div class="skeleton-line skeleton w-80"></div><div class="skeleton-line skeleton w-50"></div></div></div>
+          <div class="skeleton skeleton-card"><div class="skeleton-cover skeleton"></div><div class="skeleton-body"><div class="skeleton-line skeleton w-80"></div><div class="skeleton-line skeleton w-50"></div></div></div>
+          <div class="skeleton skeleton-card"><div class="skeleton-cover skeleton"></div><div class="skeleton-body"><div class="skeleton-line skeleton w-80"></div><div class="skeleton-line skeleton w-50"></div></div></div>
+        </div>
+
+        <!-- Real grid -->
+        <div class="game-grid-12" id="realGrid" style="display:none">
+
+          <a href="game-detail.html" class="game-card" data-cat="moba" data-name="Mobile Legends Bang Bang">
+            <div class="game-card-cover cover-ml">
+              <div class="cover-emblem">⚔️</div><div class="cover-glow"></div>
+              <div class="card-num-badge"><div class="badge badge-gradient">🔥 #1</div></div>
+            </div>
+            <div class="game-card-body">
+              <div class="game-card-name">Mobile Legends: Bang Bang</div>
+              <div class="game-card-meta"><span class="badge badge-primary">⚔️ MOBA</span><span class="game-card-rating">⭐ 4.9</span></div>
+              <div class="game-card-footer"><div><div class="game-card-price">From ฿29</div><span class="badge badge-success" style="margin-top:4px">⚡ Instant</span></div><button class="fav-btn" onclick="toggleFav(this,event)">♥</button></div>
+            </div>
+          </a>
+
+          <a href="game-detail.html" class="game-card" data-cat="br" data-name="PUBG Mobile">
+            <div class="game-card-cover cover-pubg">
+              <div class="cover-emblem">🔫</div><div class="cover-glow"></div>
+            </div>
+            <div class="game-card-body">
+              <div class="game-card-name">PUBG Mobile</div>
+              <div class="game-card-meta"><span class="badge badge-warning">💥 Battle Royale</span><span class="game-card-rating">⭐ 4.8</span></div>
+              <div class="game-card-footer"><div><div class="game-card-price">From ฿35</div><span class="badge badge-success" style="margin-top:4px">⚡ Instant</span></div><button class="fav-btn" onclick="toggleFav(this,event)">♥</button></div>
+            </div>
+          </a>
+
+          <a href="game-detail.html" class="game-card" data-cat="br" data-name="Free Fire">
+            <div class="game-card-cover cover-ff">
+              <div class="cover-emblem">🔥</div><div class="cover-glow"></div>
+              <div class="card-num-badge"><div class="badge badge-hot">HOT</div></div>
+            </div>
+            <div class="game-card-body">
+              <div class="game-card-name">Free Fire MAX</div>
+              <div class="game-card-meta"><span class="badge badge-warning">💥 Battle Royale</span><span class="game-card-rating">⭐ 4.7</span></div>
+              <div class="game-card-footer"><div><div class="game-card-price">From ฿29</div><span class="badge badge-success" style="margin-top:4px">⚡ Instant</span></div><button class="fav-btn" onclick="toggleFav(this,event)">♥</button></div>
+            </div>
+          </a>
+
+          <a href="game-detail.html" class="game-card" data-cat="anime" data-name="Genshin Impact">
+            <div class="game-card-cover cover-gi">
+              <div class="cover-emblem">🌸</div><div class="cover-glow"></div>
+            </div>
+            <div class="game-card-body">
+              <div class="game-card-name">Genshin Impact</div>
+              <div class="game-card-meta"><span class="badge badge-secondary">🎌 Anime RPG</span><span class="game-card-rating">⭐ 4.8</span></div>
+              <div class="game-card-footer"><div><div class="game-card-price">From ฿59</div><span class="badge badge-success" style="margin-top:4px">⚡ Instant</span></div><button class="fav-btn active" onclick="toggleFav(this,event)">♥</button></div>
+            </div>
+          </a>
+
+          <a href="game-detail.html" class="game-card" data-cat="fps" data-name="Valorant">
+            <div class="game-card-cover cover-val">
+              <div class="cover-emblem">🎯</div><div class="cover-glow"></div>
+            </div>
+            <div class="game-card-body">
+              <div class="game-card-name">Valorant</div>
+              <div class="game-card-meta"><span class="badge badge-error">🔫 FPS</span><span class="game-card-rating">⭐ 4.9</span></div>
+              <div class="game-card-footer"><div><div class="game-card-price">From ฿79</div><span class="badge badge-success" style="margin-top:4px">⚡ Instant</span></div><button class="fav-btn" onclick="toggleFav(this,event)">♥</button></div>
+            </div>
+          </a>
+
+          <a href="game-detail.html" class="game-card" data-cat="moba" data-name="League of Legends">
+            <div class="game-card-cover cover-lol">
+              <div class="cover-emblem">🏆</div><div class="cover-glow"></div>
+            </div>
+            <div class="game-card-body">
+              <div class="game-card-name">League of Legends</div>
+              <div class="game-card-meta"><span class="badge badge-primary">⚔️ MOBA</span><span class="game-card-rating">⭐ 4.8</span></div>
+              <div class="game-card-footer"><div><div class="game-card-price">From ฿59</div><span class="badge badge-success" style="margin-top:4px">⚡ Instant</span></div><button class="fav-btn" onclick="toggleFav(this,event)">♥</button></div>
+            </div>
+          </a>
+
+          <a href="game-detail.html" class="game-card" data-cat="anime" data-name="Honkai Star Rail">
+            <div class="game-card-cover cover-hsr">
+              <div class="cover-emblem">⭐</div><div class="cover-glow"></div>
+              <div class="card-num-badge"><div class="badge badge-info">NEW</div></div>
+            </div>
+            <div class="game-card-body">
+              <div class="game-card-name">Honkai: Star Rail</div>
+              <div class="game-card-meta"><span class="badge badge-secondary">🎌 Anime RPG</span><span class="game-card-rating">⭐ 4.9</span></div>
+              <div class="game-card-footer"><div><div class="game-card-price">From ฿59</div><span class="badge badge-success" style="margin-top:4px">⚡ Instant</span></div><button class="fav-btn" onclick="toggleFav(this,event)">♥</button></div>
+            </div>
+          </a>
+
+          <a href="game-detail.html" class="game-card" data-cat="fps" data-name="COD Mobile">
+            <div class="game-card-cover cover-cod">
+              <div class="cover-emblem">💀</div><div class="cover-glow"></div>
+            </div>
+            <div class="game-card-body">
+              <div class="game-card-name">COD: Mobile</div>
+              <div class="game-card-meta"><span class="badge badge-error">🔫 FPS</span><span class="game-card-rating">⭐ 4.7</span></div>
+              <div class="game-card-footer"><div><div class="game-card-price">From ฿49</div><span class="badge badge-success" style="margin-top:4px">⚡ Instant</span></div><button class="fav-btn" onclick="toggleFav(this,event)">♥</button></div>
+            </div>
+          </a>
+
+          <a href="game-detail.html" class="game-card" data-cat="fps" data-name="Overwatch 2">
+            <div class="game-card-cover cover-ow2">
+              <div class="cover-emblem">🦸</div><div class="cover-glow"></div>
+            </div>
+            <div class="game-card-body">
+              <div class="game-card-name">Overwatch 2</div>
+              <div class="game-card-meta"><span class="badge badge-error">🔫 FPS</span><span class="game-card-rating">⭐ 4.5</span></div>
+              <div class="game-card-footer"><div><div class="game-card-price">From ฿99</div><span class="badge badge-success" style="margin-top:4px">⚡ Instant</span></div><button class="fav-btn" onclick="toggleFav(this,event)">♥</button></div>
+            </div>
+          </a>
+
+          <a href="game-detail.html" class="game-card" data-cat="br" data-name="Apex Legends Mobile">
+            <div class="game-card-cover cover-apex">
+              <div class="cover-emblem">⚡</div><div class="cover-glow"></div>
+            </div>
+            <div class="game-card-body">
+              <div class="game-card-name">Apex Legends Mobile</div>
+              <div class="game-card-meta"><span class="badge badge-warning">💥 Battle Royale</span><span class="game-card-rating">⭐ 4.6</span></div>
+              <div class="game-card-footer"><div><div class="game-card-price">From ฿65</div><span class="badge badge-success" style="margin-top:4px">⚡ Instant</span></div><button class="fav-btn" onclick="toggleFav(this,event)">♥</button></div>
+            </div>
+          </a>
+
+          <a href="game-detail.html" class="game-card" data-cat="anime" data-name="Clash Royale">
+            <div class="game-card-cover cover-cr">
+              <div class="cover-emblem">👑</div><div class="cover-glow"></div>
+            </div>
+            <div class="game-card-body">
+              <div class="game-card-name">Clash Royale</div>
+              <div class="game-card-meta"><span class="badge badge-secondary">🃏 Card Game</span><span class="game-card-rating">⭐ 4.5</span></div>
+              <div class="game-card-footer"><div><div class="game-card-price">From ฿39</div><span class="badge badge-success" style="margin-top:4px">⚡ Instant</span></div><button class="fav-btn" onclick="toggleFav(this,event)">♥</button></div>
+            </div>
+          </a>
+
+          <a href="game-detail.html" class="game-card" data-cat="mmorpg" data-name="Arena of Valor">
+            <div class="game-card-cover cover-ao">
+              <div class="cover-emblem">🐉</div><div class="cover-glow"></div>
+            </div>
+            <div class="game-card-body">
+              <div class="game-card-name">Arena of Valor</div>
+              <div class="game-card-meta"><span class="badge badge-primary">⚔️ MOBA</span><span class="game-card-rating">⭐ 4.6</span></div>
+              <div class="game-card-footer"><div><div class="game-card-price">From ฿29</div><span class="badge badge-success" style="margin-top:4px">⚡ Instant</span></div><button class="fav-btn" onclick="toggleFav(this,event)">♥</button></div>
+            </div>
+          </a>
+
+        </div>
+
+        <!-- Empty State (hidden by default) -->
+        <div class="empty-state" id="emptyState" style="display:none">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="50" fill="rgba(79,140,255,0.08)" stroke="rgba(79,140,255,0.2)" stroke-width="1.5"/>
+            <text x="60" y="72" text-anchor="middle" font-size="48">🎮</text>
+          </svg>
+          <div class="empty-title">No games found</div>
+          <div class="empty-desc">Try adjusting your search or filters to find what you're looking for.</div>
+          <button class="btn btn-ghost" onclick="clearSearch()">Clear Search</button>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" style="margin-top:40px" id="pagination">
+          <button class="page-btn" onclick="changePage(event, 'prev')">‹</button>
+          <button class="page-btn active" onclick="changePage(event, 1)">1</button>
+          <button class="page-btn" onclick="changePage(event, 2)">2</button>
+          <button class="page-btn" onclick="changePage(event, 3)">3</button>
+          <span style="color:var(--text-muted); padding:0 4px">...</span>
+          <button class="page-btn" onclick="changePage(event, 9)">9</button>
+          <button class="page-btn" onclick="changePage(event, 'next')">›</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FILTER MODAL (mobile) -->
+<div class="filter-modal-overlay" id="filterModal" onclick="closeFilterModal(event)">
+  <div class="filter-modal-panel" onclick="event.stopPropagation()">
+    <div class="filter-modal-header">
+      <h4>🔧 Filters</h4>
+      <button class="modal-close" onclick="closeFilterModal()" style="position:static; width:36px; height:36px;">✕</button>
+    </div>
+    <div class="filter-section">
+      <div class="filter-title">Category</div>
+      <label class="checkbox-item"><input type="checkbox" checked> <label>MOBA</label></label>
+      <label class="checkbox-item"><input type="checkbox" checked> <label>FPS / Shooter</label></label>
+      <label class="checkbox-item"><input type="checkbox"> <label>RPG</label></label>
+      <label class="checkbox-item"><input type="checkbox"> <label>Battle Royale</label></label>
+    </div>
+    <div class="filter-section">
+      <div class="filter-title">Availability</div>
+      <label class="checkbox-item"><input type="checkbox" checked> <label>⚡ Instant Delivery</label></label>
+      <label class="checkbox-item"><input type="checkbox"> <label>🔥 On Sale</label></label>
+    </div>
+    <div style="display:flex; gap:12px; margin-top:24px">
+      <button class="btn btn-ghost flex-1" onclick="closeFilterModal()">Cancel</button>
+      <button class="btn btn-primary flex-1" onclick="applyFilters(); closeFilterModal()">Apply Filters</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo text-gradient">⚡ Legends Topup</div>
+        <div class="footer-tagline">Thailand's #1 premium game top-up platform. Instant delivery, best prices, 24/7 support.</div>
+        <div class="footer-socials">
+          <a href="#" class="social-btn">𝐟</a>
+          <a href="#" class="social-btn">🟩</a>
+          <a href="#" class="social-btn">💬</a>
+          <a href="#" class="social-btn">𝕏</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Quick Links</div>
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="games.html">All Games</a>
+          <a href="history.html">My Orders</a>
+          <a href="index.html#vip">VIP Program</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Support</div>
+        <div class="footer-links">
+          <a href="#">Help Center</a>
+          <a href="#">Live Chat</a>
+          <a href="#">Contact Us</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <div class="footer-links">
+          <a href="#">About Us</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2024 Legends Topup. All rights reserved.</div>
+      <div class="payment-badges">
+        <div class="payment-badge">PromptPay</div>
+        <div class="payment-badge">VISA</div>
+        <div class="payment-badge">Mastercard</div>
+        <div class="payment-badge">PayPal</div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Hamburger
+const hamburger = document.getElementById('hamburger');
+const navDrawer = document.getElementById('navDrawer');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('open');
+  navDrawer.classList.toggle('open');
+});
+
+// Skeleton
+setTimeout(() => {
+  document.getElementById('skeletonGrid').style.display = 'none';
+  document.getElementById('realGrid').style.display = 'grid';
+}, 800);
+
+// Category tabs
+document.querySelectorAll('#catTabs .tab-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#catTabs .tab-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    filterGames();
+  });
+});
+
+// Filter / Search
+function filterGames() {
+  const search = document.getElementById('gameSearch').value.toLowerCase();
+  const activeCat = document.querySelector('#catTabs .tab-btn.active')?.dataset.cat || 'all';
+  const cards = document.querySelectorAll('#realGrid .game-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const name = card.dataset.name?.toLowerCase() || '';
+    const cat = card.dataset.cat || '';
+    const matchSearch = !search || name.includes(search);
+    const matchCat = activeCat === 'all' || cat === activeCat;
+    const show = matchSearch && matchCat;
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('resultsCount').textContent = `Showing ${visible} game${visible !== 1 ? 's' : ''}`;
+  document.getElementById('emptyState').style.display = visible === 0 ? 'flex' : 'none';
+  document.getElementById('pagination').style.display = visible === 0 ? 'none' : 'flex';
+}
+
+function clearSearch() {
+  document.getElementById('gameSearch').value = '';
+  filterGames();
+}
+
+function clearFilters() {
+  document.querySelectorAll('.filter-sidebar input[type=checkbox]').forEach(cb => cb.checked = false);
+}
+
+function applyFilters() {
+  showToast('Filters applied!', 'success');
+}
+
+// Filter Modal
+function openFilterModal() {
+  document.getElementById('filterModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeFilterModal(e) {
+  if (!e || e.target === document.getElementById('filterModal')) {
+    document.getElementById('filterModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+}
+
+// Pagination
+function changePage(e, page) {
+  document.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+  if (typeof page === 'number') e.currentTarget.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Favorite
+function toggleFav(btn, e) {
+  e.preventDefault(); e.stopPropagation();
+  btn.classList.toggle('active');
+  showToast(btn.classList.contains('active') ? '♥ Added to favorites!' : '♡ Removed', 'info');
+}
+
+// Toast
+function showToast(msg, type = 'info') {
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><div class="toast-content"><div class="toast-msg">${msg}</div></div><button class="toast-close" onclick="this.closest('.toast').remove()">✕</button>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// Handle search query from URL
+const urlParams = new URLSearchParams(window.location.search);
+const q = urlParams.get('q');
+if (q) {
+  setTimeout(() => {
+    document.getElementById('gameSearch').value = q;
+    filterGames();
+  }, 900);
+}
+</script>
+</body>
+</html>

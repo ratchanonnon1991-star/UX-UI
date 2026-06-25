@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mobile Legends: Bang Bang — Top Up | Legends Topup</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.pkg-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+@media (max-width: 767px) { .pkg-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 399px) { .pkg-grid { grid-template-columns: 1fr 1fr; gap: 10px; } }
+
+.pkg-card { position: relative; }
+.pkg-badge-top {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  z-index: 2;
+}
+.pkg-card .diamond-icon { font-size: 28px; margin-bottom: 8px; }
+
+.step-label-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-pill);
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.step-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 20px;
+  transition: border-color var(--transition);
+}
+.step-section.step-done { border-color: rgba(16,185,129,.35); }
+.step-section.step-active { border-color: rgba(79,140,255,.4); box-shadow: 0 0 20px rgba(79,140,255,.1); }
+
+.detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 32px;
+  align-items: start;
+}
+@media (max-width: 1023px) {
+  .detail-layout { grid-template-columns: 1fr; }
+  .order-summary { position: static; }
+}
+</style>
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="nav-logo">⚡ Legends Topup</a>
+    <div class="nav-links">
+      <a href="games.html" class="active">Games</a>
+      <a href="index.html#promotions">Promotions</a>
+      <a href="history.html">History</a>
+      <a href="index.html#vip">VIP</a>
+    </div>
+    <div class="nav-actions">
+      <a href="#" class="nav-login">Login</a>
+      <a href="games.html" class="btn btn-primary btn-sm">⚡ Top Up Now</a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+<div class="nav-drawer" id="navDrawer">
+  <a href="games.html">🎮 Games</a>
+  <a href="index.html#promotions">🔥 Promotions</a>
+  <a href="history.html">📋 History</a>
+  <a href="index.html#vip">🏆 VIP</a>
+  <a href="#" class="btn btn-ghost">Login</a>
+  <a href="games.html" class="btn btn-primary">⚡ Top Up Now</a>
+</div>
+
+<!-- ══ BREADCRUMB ══ -->
+<div style="background:var(--surface); border-bottom:1px solid var(--border);">
+  <div class="container" style="padding-block:12px; display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted);">
+    <a href="index.html" style="color:var(--text-muted); hover:color:var(--text)">Home</a>
+    <span>›</span>
+    <a href="games.html" style="color:var(--text-muted)">Games</a>
+    <span>›</span>
+    <span style="color:var(--text)">Mobile Legends: Bang Bang</span>
+  </div>
+</div>
+
+<section class="section" style="padding-top:40px">
+  <div class="container">
+
+    <!-- GAME BANNER -->
+    <div class="game-banner">
+      <div class="game-banner-bg cover-ml" style="width:100%; height:100%;">
+        <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:120px; opacity:.15;">⚔️</div>
+        <div style="position:absolute; inset:0; background:radial-gradient(circle at 70% 50%, rgba(59,130,246,.3), transparent 60%)"></div>
+      </div>
+      <div class="game-banner-overlay">
+        <div class="game-banner-info">
+          <div class="flex gap-8 flex-wrap" style="margin-bottom:12px">
+            <span class="badge badge-primary">⚔️ MOBA</span>
+            <span class="badge badge-success">⚡ Instant Delivery</span>
+            <span class="badge badge-gradient">🔥 Most Popular</span>
+          </div>
+          <h1 style="margin-bottom:8px; color:#fff">Mobile Legends: Bang Bang</h1>
+          <div class="flex gap-16 flex-wrap items-center">
+            <span style="color:rgba(255,255,255,.75); font-size:14px">⭐ 4.9 · 2M+ orders · Developer: Moonton</span>
+          </div>
+          <p style="margin-top:12px; color:rgba(255,255,255,.65); font-size:14px; max-width:500px">Top up diamonds to unlock skins, heroes, and exclusive seasonal content. Official channel — 100% safe.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-layout">
+      <!-- LEFT: TOP-UP FLOW -->
+      <div>
+
+        <!-- REGION SELECTOR -->
+        <div class="step-section step-done">
+          <div class="step-label-chip">🌍 Region</div>
+          <div style="font-weight:700; font-size:16px; margin-bottom:16px">Select Your Region</div>
+          <div class="region-tabs" id="regionTabs">
+            <button class="region-tab active" onclick="selectRegion(this)">🌏 Global</button>
+            <button class="region-tab" onclick="selectRegion(this)">🇹🇭 Thailand</button>
+            <button class="region-tab" onclick="selectRegion(this)">🌐 SEA</button>
+            <button class="region-tab" onclick="selectRegion(this)">🇺🇸 North America</button>
+            <button class="region-tab" onclick="selectRegion(this)">🇪🇺 Europe</button>
+          </div>
+        </div>
+
+        <!-- STEP 1: PLAYER ID -->
+        <div class="step-section step-active" id="step1">
+          <div class="step-label-chip">Step 1 · Enter Player ID</div>
+          <div style="font-weight:700; font-size:18px; margin-bottom:6px">Enter Your User ID</div>
+          <div style="font-size:14px; color:var(--text-muted); margin-bottom:20px">Your ID is visible in your game profile. Never enter your password.</div>
+
+          <div class="input-group" style="margin-bottom:16px">
+            <label class="input-label">User ID (UID)</label>
+            <div style="display:flex; gap:10px">
+              <div class="input-wrapper flex-1">
+                <span class="input-icon">🎮</span>
+                <input type="text" class="input" id="uidInput" placeholder="e.g. 123456789" value="456789123">
+              </div>
+              <div class="input-group" style="flex-shrink:0">
+                <label class="input-label">Server</label>
+                <select class="input" style="width:120px; flex-shrink:0">
+                  <option>Server 1</option>
+                  <option>Server 2</option>
+                  <option>Server 3</option>
+                  <option>Server 4</option>
+                </select>
+              </div>
+            </div>
+            <div class="input-helper">💡 Go to your profile → tap your avatar → copy the ID number shown below your name</div>
+          </div>
+
+          <button class="btn btn-primary" onclick="verifyPlayer()" id="verifyBtn">
+            🔍 Verify Player
+          </button>
+
+          <!-- Player card (shown after verify) -->
+          <div id="playerCard" style="display:none; margin-top:20px">
+            <div class="player-card">
+              <div class="player-avatar">🦸</div>
+              <div class="player-info">
+                <div class="player-name">Hero123</div>
+                <div class="player-server">Server 1 · ID: 456789123</div>
+                <div class="player-level">
+                  <span class="badge badge-accent">Lv. 85</span>
+                  <span class="badge badge-primary">💎 1,200 diamonds</span>
+                </div>
+              </div>
+              <div style="color:var(--success); font-size:20px">✅</div>
+            </div>
+            <div style="margin-top:10px; font-size:13px; color:var(--text-muted)">
+              ⚠️ Please confirm this is your account before proceeding.
+              <button onclick="changePlayer()" style="background:none; border:none; color:var(--primary); cursor:pointer; font-size:13px; padding:0 4px">Change Player</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: SELECT PACKAGE -->
+        <div class="step-section" id="step2" style="opacity:.5; pointer-events:none">
+          <div class="step-label-chip">Step 2 · Select Package</div>
+          <div style="font-weight:700; font-size:18px; margin-bottom:6px">Choose Diamond Package</div>
+          <div style="font-size:14px; color:var(--text-muted); margin-bottom:24px">More diamonds = better value per unit. ⭐ marks best deals.</div>
+
+          <!-- Smart Recommendation -->
+          <div class="recommendation-banner" id="smartRec">
+            <span class="rec-icon">💡</span>
+            <div class="rec-content">
+              <div class="rec-title">Smart Recommendation</div>
+              <div class="rec-text">Based on your history, we recommend the <strong>706 💎 package</strong> — best value for your play style!</div>
+            </div>
+            <span class="smart-badge">🤖 AI Pick</span>
+          </div>
+
+          <div class="pkg-grid" id="pkgGrid">
+
+            <div class="pkg-card" data-pkg="86" data-price="29" onclick="selectPkg(this)">
+              <div class="diamond-icon">💎</div>
+              <div class="diamond-count">86</div>
+              <div style="font-size:12px; color:var(--cyan); margin-bottom:6px">Diamonds</div>
+              <div class="price">฿29</div>
+              <div class="per-unit">฿0.34/diamond</div>
+            </div>
+
+            <div class="pkg-card" data-pkg="172" data-price="59" onclick="selectPkg(this)">
+              <div class="diamond-icon">💎</div>
+              <div class="diamond-count">172</div>
+              <div style="font-size:12px; color:var(--cyan); margin-bottom:6px">Diamonds</div>
+              <div class="price">฿59</div>
+              <div class="per-unit">฿0.34/diamond</div>
+            </div>
+
+            <div class="pkg-card" data-pkg="257" data-price="89" onclick="selectPkg(this)">
+              <div class="diamond-icon">💎</div>
+              <div class="diamond-count">257</div>
+              <div style="font-size:12px; color:var(--cyan); margin-bottom:6px">Diamonds</div>
+              <div class="price">฿89</div>
+              <div class="per-unit">฿0.35/diamond</div>
+            </div>
+
+            <div class="pkg-card" data-pkg="344" data-price="119" onclick="selectPkg(this)">
+              <div class="diamond-icon">💎</div>
+              <div class="diamond-count">344</div>
+              <div style="font-size:12px; color:var(--cyan); margin-bottom:6px">Diamonds</div>
+              <div class="price">฿119</div>
+              <div class="per-unit">฿0.35/diamond</div>
+            </div>
+
+            <div class="pkg-card" data-pkg="429" data-price="149" onclick="selectPkg(this)">
+              <div class="diamond-icon">💎</div>
+              <div class="diamond-count">429</div>
+              <div style="font-size:12px; color:var(--cyan); margin-bottom:6px">Diamonds</div>
+              <div class="price">฿149</div>
+              <div class="per-unit">฿0.35/diamond</div>
+            </div>
+
+            <div class="pkg-card" data-pkg="514" data-price="179" onclick="selectPkg(this)">
+              <div class="diamond-icon">💎</div>
+              <div class="diamond-count">514</div>
+              <div style="font-size:12px; color:var(--cyan); margin-bottom:6px">Diamonds</div>
+              <div class="price">฿179</div>
+              <div class="per-unit">฿0.35/diamond</div>
+            </div>
+
+            <div class="pkg-card" data-pkg="706" data-price="239" onclick="selectPkg(this)" id="pkgRecommended">
+              <div class="pkg-badge-top"><span class="badge badge-accent">⭐ Best Value</span></div>
+              <div class="diamond-icon">💎✨</div>
+              <div class="diamond-count">706</div>
+              <div style="font-size:12px; color:var(--cyan); margin-bottom:6px">Diamonds</div>
+              <div class="price">฿239</div>
+              <div class="per-unit">฿0.34/diamond</div>
+            </div>
+
+            <div class="pkg-card" data-pkg="1412" data-price="479" onclick="selectPkg(this)">
+              <div class="diamond-icon">💎💎</div>
+              <div class="diamond-count">1,412</div>
+              <div style="font-size:12px; color:var(--cyan); margin-bottom:6px">Diamonds</div>
+              <div class="price">฿479</div>
+              <div class="per-unit">฿0.34/diamond</div>
+            </div>
+
+            <div class="pkg-card" data-pkg="2195" data-price="759" onclick="selectPkg(this)">
+              <div class="diamond-icon">💎💎</div>
+              <div class="diamond-count">2,195</div>
+              <div style="font-size:12px; color:var(--cyan); margin-bottom:6px">Diamonds</div>
+              <div class="price">฿759</div>
+              <div class="per-unit">฿0.35/diamond</div>
+            </div>
+
+            <div class="pkg-card" data-pkg="3688" data-price="1199" onclick="selectPkg(this)" style="position:relative;">
+              <div class="pkg-badge-top"><span class="badge badge-hot">🔥 Best Seller</span></div>
+              <div class="diamond-icon">💎💎💎</div>
+              <div class="diamond-count">3,688</div>
+              <div style="font-size:12px; color:var(--cyan); margin-bottom:6px">Diamonds</div>
+              <div class="price">฿1,199</div>
+              <div class="per-unit">฿0.33/diamond</div>
+            </div>
+
+            <div class="pkg-card" data-pkg="weekly" data-price="89" onclick="selectPkg(this)" style="grid-column:span 2; text-align:center;">
+              <div class="diamond-icon">🗓️💎</div>
+              <div class="diamond-count">Weekly Diamond Pass</div>
+              <div style="font-size:12px; color:var(--cyan); margin-bottom:6px">100💎 + 5x Daily 50💎 (7 days)</div>
+              <div class="price">฿89</div>
+              <div class="per-unit">Best for daily players</div>
+            </div>
+
+          </div>
+
+          <!-- Coupon Code -->
+          <div style="margin-top:28px">
+            <div style="font-weight:700; font-size:15px; margin-bottom:12px">🎟️ Coupon Code</div>
+            <div class="coupon-row">
+              <input type="text" class="input" id="couponInput" placeholder="Enter promo code (e.g. LT2024)">
+              <button class="btn btn-secondary" onclick="applyCoupon()">Apply</button>
+            </div>
+            <div id="couponMsg" style="margin-top:8px; font-size:13px; display:none"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- RIGHT: ORDER SUMMARY -->
+      <div>
+        <div class="order-summary" id="orderSummary">
+          <h4 style="margin-bottom:20px">📋 Order Summary</h4>
+
+          <div class="summary-row">
+            <span class="label">Game</span>
+            <span class="value">Mobile Legends</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Player</span>
+            <span class="value" id="summaryPlayer">—</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Region</span>
+            <span class="value" id="summaryRegion">Global</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Package</span>
+            <span class="value" id="summaryPkg">—</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Subtotal</span>
+            <span class="value" id="summarySubtotal">—</span>
+          </div>
+          <div class="summary-row summary-discount" id="discountRow" style="display:none">
+            <span class="label">Discount</span>
+            <span class="value text-success" id="summaryDiscount">-฿0</span>
+          </div>
+          <div class="summary-row total">
+            <span class="label">Total</span>
+            <span class="value" id="summaryTotal">—</span>
+          </div>
+
+          <div style="margin-block:20px; padding:12px 16px; background:rgba(16,185,129,.07); border:1px solid rgba(16,185,129,.2); border-radius:var(--radius-md);">
+            <div style="font-size:13px; color:var(--success); font-weight:600">⚡ Instant Delivery Guaranteed</div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:2px">Diamonds credited within 60 seconds of payment</div>
+          </div>
+
+          <a href="payment.html" class="btn btn-primary w-full btn-lg" id="continueBtn" style="pointer-events:none; opacity:.4">
+            Continue to Payment →
+          </a>
+
+          <div style="margin-top:16px; text-align:center; font-size:12px; color:var(--text-muted)">
+            🔒 Secured by SSL · No account password needed
+          </div>
+
+          <!-- Trust badges -->
+          <div style="display:flex; justify-content:center; gap:16px; margin-top:16px; flex-wrap:wrap">
+            <div style="font-size:11px; color:var(--text-muted); text-align:center"><div style="font-size:20px">🏅</div>Official</div>
+            <div style="font-size:11px; color:var(--text-muted); text-align:center"><div style="font-size:20px">🔒</div>Secure</div>
+            <div style="font-size:11px; color:var(--text-muted); text-align:center"><div style="font-size:20px">⚡</div>Instant</div>
+            <div style="font-size:11px; color:var(--text-muted); text-align:center"><div style="font-size:20px">🎧</div>24/7 Support</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- Mobile bottom bar -->
+<div class="mobile-order-bar">
+  <div>
+    <div style="font-size:12px; color:var(--text-muted)">Total</div>
+    <div style="font-size:20px; font-weight:800; color:var(--accent)" id="mobileTotal">—</div>
+  </div>
+  <a href="payment.html" class="btn btn-primary" id="mobileContinueBtn" style="pointer-events:none; opacity:.4; padding-inline:32px">
+    Continue →
+  </a>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer" style="padding-bottom:80px">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo text-gradient">⚡ Legends Topup</div>
+        <div class="footer-tagline">Thailand's #1 premium game top-up platform.</div>
+        <div class="footer-socials">
+          <a href="#" class="social-btn">𝐟</a>
+          <a href="#" class="social-btn">🟩</a>
+          <a href="#" class="social-btn">💬</a>
+          <a href="#" class="social-btn">𝕏</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Quick Links</div>
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="games.html">All Games</a>
+          <a href="history.html">My Orders</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Support</div>
+        <div class="footer-links">
+          <a href="#">Help Center</a>
+          <a href="#">Live Chat</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <div class="footer-links">
+          <a href="#">About Us</a>
+          <a href="#">Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2024 Legends Topup. All rights reserved.</div>
+      <div class="payment-badges">
+        <div class="payment-badge">PromptPay</div>
+        <div class="payment-badge">VISA</div>
+        <div class="payment-badge">Mastercard</div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Hamburger
+const hamburger = document.getElementById('hamburger');
+const navDrawer = document.getElementById('navDrawer');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('open');
+  navDrawer.classList.toggle('open');
+});
+
+let selectedPkg = null;
+let playerVerified = false;
+let couponDiscount = 0;
+
+function selectRegion(btn) {
+  document.querySelectorAll('.region-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('summaryRegion').textContent = btn.textContent;
+}
+
+function verifyPlayer() {
+  const uid = document.getElementById('uidInput').value.trim();
+  if (!uid) { showToast('Please enter your User ID', 'warning'); return; }
+
+  const btn = document.getElementById('verifyBtn');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Verifying...';
+
+  setTimeout(() => {
+    btn.innerHTML = '🔍 Verify Player';
+    btn.disabled = false;
+    document.getElementById('playerCard').style.display = 'block';
+    document.getElementById('step1').classList.add('step-done');
+    document.getElementById('step1').classList.remove('step-active');
+
+    // Enable step 2
+    const step2 = document.getElementById('step2');
+    step2.style.opacity = '1';
+    step2.style.pointerEvents = 'auto';
+    step2.classList.add('step-active');
+
+    document.getElementById('summaryPlayer').textContent = 'Hero123 · #' + uid;
+    playerVerified = true;
+    updateContinueBtn();
+    showToast('✅ Player verified successfully!', 'success', 'Verified');
+    step2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 1200);
+}
+
+function changePlayer() {
+  document.getElementById('playerCard').style.display = 'none';
+  document.getElementById('uidInput').value = '';
+  playerVerified = false;
+  document.getElementById('summaryPlayer').textContent = '—';
+  const step2 = document.getElementById('step2');
+  step2.style.opacity = '.5';
+  step2.style.pointerEvents = 'none';
+  selectedPkg = null;
+  updateSummary();
+  updateContinueBtn();
+}
+
+function selectPkg(card) {
+  document.querySelectorAll('.pkg-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedPkg = { diamonds: card.dataset.pkg, price: parseInt(card.dataset.price) };
+  updateSummary();
+  updateContinueBtn();
+  showToast(`💎 ${card.dataset.pkg} diamonds selected!`, 'info');
+}
+
+function updateSummary() {
+  if (!selectedPkg) {
+    document.getElementById('summaryPkg').textContent = '—';
+    document.getElementById('summarySubtotal').textContent = '—';
+    document.getElementById('summaryTotal').textContent = '—';
+    document.getElementById('mobileTotal').textContent = '—';
+    return;
+  }
+  const base = selectedPkg.price;
+  const total = Math.max(0, base - couponDiscount);
+  const pkgLabel = selectedPkg.diamonds === 'weekly' ? 'Weekly Diamond Pass' : `${selectedPkg.diamonds} 💎 Diamonds`;
+  document.getElementById('summaryPkg').textContent = pkgLabel;
+  document.getElementById('summarySubtotal').textContent = `฿${base.toLocaleString()}`;
+  document.getElementById('summaryTotal').textContent = `฿${total.toLocaleString()}`;
+  document.getElementById('mobileTotal').textContent = `฿${total.toLocaleString()}`;
+  if (couponDiscount > 0) {
+    document.getElementById('discountRow').style.display = 'flex';
+    document.getElementById('summaryDiscount').textContent = `-฿${couponDiscount}`;
+  }
+}
+
+function updateContinueBtn() {
+  const ready = playerVerified && selectedPkg;
+  document.getElementById('continueBtn').style.pointerEvents = ready ? 'auto' : 'none';
+  document.getElementById('continueBtn').style.opacity = ready ? '1' : '.4';
+  document.getElementById('mobileContinueBtn').style.pointerEvents = ready ? 'auto' : 'none';
+  document.getElementById('mobileContinueBtn').style.opacity = ready ? '1' : '.4';
+}
+
+function applyCoupon() {
+  const code = document.getElementById('couponInput').value.trim().toUpperCase();
+  const msg = document.getElementById('couponMsg');
+  msg.style.display = 'block';
+  if (code === 'LT2024' || code === 'LEGENDS10') {
+    couponDiscount = 30;
+    msg.style.color = 'var(--success)';
+    msg.textContent = '✅ Coupon applied! You saved ฿30';
+    updateSummary();
+    showToast('🎟️ Coupon applied — ฿30 off!', 'success');
+  } else if (code === '') {
+    msg.style.color = 'var(--error)';
+    msg.textContent = '❌ Please enter a coupon code';
+  } else {
+    msg.style.color = 'var(--error)';
+    msg.textContent = '❌ Invalid or expired coupon code';
+  }
+}
+
+// Toast
+function showToast(msg, type = 'info', title = '') {
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><div class="toast-content">${title?`<div class="toast-title">${title}</div>`:''}<div class="toast-msg">${msg}</div></div><button class="toast-close" onclick="this.closest('.toast').remove()">✕</button>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// Auto-verify on load for demo feel
+setTimeout(() => {
+  // Pre-select the recommended package for demo
+  const recPkg = document.getElementById('pkgRecommended');
+  if (recPkg && !selectedPkg) {
+    // don't auto-select, let user do it
+  }
+}, 500);
+</script>
+</body>
+</html>

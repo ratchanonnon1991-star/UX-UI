@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment — Legends Topup</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.payment-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 32px;
+  align-items: start;
+}
+@media (max-width: 1023px) {
+  .payment-layout { grid-template-columns: 1fr; }
+  .order-summary { position: static; }
+}
+.pm-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+@media (max-width: 599px) { .pm-grid { grid-template-columns: 1fr; } }
+
+.qr-wrapper {
+  text-align: center;
+  padding: 32px;
+  background: var(--surface-2);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+.payment-detail-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+  margin-top: 24px;
+  animation: fadeIn 300ms ease;
+}
+
+/* Card form */
+.card-form { display: flex; flex-direction: column; gap: 16px; }
+.card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 479px) { .card-row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="nav-logo">⚡ Legends Topup</a>
+    <div class="nav-links">
+      <a href="games.html">Games</a>
+      <a href="index.html#promotions">Promotions</a>
+      <a href="history.html">History</a>
+      <a href="index.html#vip">VIP</a>
+    </div>
+    <div class="nav-actions">
+      <a href="#" class="nav-login">Login</a>
+      <a href="games.html" class="btn btn-primary btn-sm">⚡ Top Up Now</a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+<div class="nav-drawer" id="navDrawer">
+  <a href="games.html">🎮 Games</a>
+  <a href="index.html#promotions">🔥 Promotions</a>
+  <a href="history.html">📋 History</a>
+  <a href="index.html#vip">🏆 VIP</a>
+  <a href="#" class="btn btn-ghost">Login</a>
+  <a href="games.html" class="btn btn-primary">⚡ Top Up Now</a>
+</div>
+
+<!-- ══ STEPPER ══ -->
+<div style="background:var(--surface); border-bottom:1px solid var(--border); padding-block:20px">
+  <div class="container">
+    <div class="stepper">
+      <div class="step done">
+        <div class="step-circle">✓</div>
+        <div class="step-info"><div class="step-label">Game</div></div>
+        <div class="step-line done"></div>
+      </div>
+      <div class="step done">
+        <div class="step-circle">✓</div>
+        <div class="step-info"><div class="step-label">Package</div></div>
+        <div class="step-line done"></div>
+      </div>
+      <div class="step active">
+        <div class="step-circle">3</div>
+        <div class="step-info"><div class="step-label">Payment</div></div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step">
+        <div class="step-circle">4</div>
+        <div class="step-info"><div class="step-label">Complete</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="section" style="padding-top:40px">
+  <div class="container">
+    <div style="margin-bottom:32px">
+      <h2>💳 Select Payment Method</h2>
+      <p>Choose your preferred payment to complete the top-up</p>
+    </div>
+
+    <div class="payment-layout">
+      <!-- LEFT: Payment Methods -->
+      <div>
+
+        <!-- Security banner -->
+        <div style="display:flex; align-items:center; gap:12px; background:rgba(16,185,129,.07); border:1px solid rgba(16,185,129,.2); border-radius:var(--radius-lg); padding:14px 20px; margin-bottom:24px">
+          <span style="font-size:24px">🔒</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:var(--success)">Secure Payment Environment</div>
+            <div style="font-size:12px; color:var(--text-muted)">256-bit SSL encryption · PCI DSS Compliant · Your data is safe</div>
+          </div>
+        </div>
+
+        <div style="font-weight:700; font-size:16px; margin-bottom:16px">Choose Payment Method</div>
+        <div class="pm-grid" id="pmGrid">
+
+          <div class="payment-card" data-pm="promptpay" onclick="selectPayment(this)">
+            <div class="pm-icon">📱</div>
+            <div>
+              <div class="pm-name">PromptPay QR</div>
+              <div class="pm-fee">No fee</div>
+              <div class="pm-eta">⚡ Instant</div>
+            </div>
+          </div>
+
+          <div class="payment-card selected" data-pm="truemoney" onclick="selectPayment(this)">
+            <div class="pm-icon">💚</div>
+            <div>
+              <div class="pm-name">TrueMoney Wallet</div>
+              <div class="pm-fee">No fee</div>
+              <div class="pm-eta">⚡ Instant</div>
+            </div>
+          </div>
+
+          <div class="payment-card" data-pm="card" onclick="selectPayment(this)">
+            <div class="pm-icon">💳</div>
+            <div>
+              <div class="pm-name">Credit / Debit Card</div>
+              <div class="pm-fee">+1.5% fee</div>
+              <div class="pm-eta">⚡ Instant</div>
+            </div>
+          </div>
+
+          <div class="payment-card" data-pm="paypal" onclick="selectPayment(this)">
+            <div class="pm-icon">🅿️</div>
+            <div>
+              <div class="pm-name">PayPal</div>
+              <div class="pm-fee">+2% fee</div>
+              <div class="pm-eta">⚡ Instant</div>
+            </div>
+          </div>
+
+          <div class="payment-card" data-pm="apple" onclick="selectPayment(this)">
+            <div class="pm-icon">🍎</div>
+            <div>
+              <div class="pm-name">Apple Pay</div>
+              <div class="pm-fee">No fee</div>
+              <div class="pm-eta">⚡ Instant</div>
+            </div>
+          </div>
+
+          <div class="payment-card" data-pm="google" onclick="selectPayment(this)">
+            <div class="pm-icon">🔵</div>
+            <div>
+              <div class="pm-name">Google Pay</div>
+              <div class="pm-fee">No fee</div>
+              <div class="pm-eta">⚡ Instant</div>
+            </div>
+          </div>
+
+          <div class="payment-card" data-pm="bank" onclick="selectPayment(this)" style="grid-column:span 2;">
+            <div class="pm-icon">🏦</div>
+            <div>
+              <div class="pm-name">Bank Transfer</div>
+              <div class="pm-fee">No fee</div>
+              <div class="pm-eta">🕐 1–15 min</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Payment Detail (dynamic) -->
+        <div id="paymentDetail">
+
+          <!-- PromptPay QR -->
+          <div id="detailPromptpay" class="payment-detail-section" style="display:none">
+            <h4 style="margin-bottom:8px">📱 PromptPay QR Code</h4>
+            <p style="margin-bottom:24px; font-size:14px">Scan this QR code with your banking app to complete payment</p>
+            <div class="qr-wrapper">
+              <!-- SVG QR Placeholder -->
+              <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="margin:0 auto 16px; display:block; border-radius:8px;">
+                <rect width="200" height="200" fill="white"/>
+                <!-- QR corner squares -->
+                <rect x="10" y="10" width="50" height="50" fill="none" stroke="#0B1220" stroke-width="6" rx="4"/>
+                <rect x="22" y="22" width="26" height="26" fill="#0B1220" rx="2"/>
+                <rect x="140" y="10" width="50" height="50" fill="none" stroke="#0B1220" stroke-width="6" rx="4"/>
+                <rect x="152" y="22" width="26" height="26" fill="#0B1220" rx="2"/>
+                <rect x="10" y="140" width="50" height="50" fill="none" stroke="#0B1220" stroke-width="6" rx="4"/>
+                <rect x="22" y="152" width="26" height="26" fill="#0B1220" rx="2"/>
+                <!-- QR data dots (simulated pattern) -->
+                <g fill="#0B1220">
+                  <rect x="72" y="10" width="8" height="8" rx="1"/>
+                  <rect x="84" y="10" width="8" height="8" rx="1"/>
+                  <rect x="96" y="10" width="8" height="8" rx="1"/>
+                  <rect x="108" y="10" width="8" height="8" rx="1"/>
+                  <rect x="120" y="10" width="8" height="8" rx="1"/>
+                  <rect x="72" y="22" width="8" height="8" rx="1"/>
+                  <rect x="96" y="22" width="8" height="8" rx="1"/>
+                  <rect x="120" y="22" width="8" height="8" rx="1"/>
+                  <rect x="72" y="34" width="8" height="8" rx="1"/>
+                  <rect x="84" y="34" width="8" height="8" rx="1"/>
+                  <rect x="108" y="34" width="8" height="8" rx="1"/>
+                  <rect x="120" y="34" width="8" height="8" rx="1"/>
+                  <rect x="72" y="46" width="8" height="8" rx="1"/>
+                  <rect x="96" y="46" width="8" height="8" rx="1"/>
+                  <rect x="10" y="72" width="8" height="8" rx="1"/>
+                  <rect x="22" y="72" width="8" height="8" rx="1"/>
+                  <rect x="46" y="72" width="8" height="8" rx="1"/>
+                  <rect x="72" y="72" width="8" height="8" rx="1"/>
+                  <rect x="84" y="72" width="8" height="8" rx="1"/>
+                  <rect x="96" y="72" width="8" height="8" rx="1"/>
+                  <rect x="120" y="72" width="8" height="8" rx="1"/>
+                  <rect x="140" y="72" width="8" height="8" rx="1"/>
+                  <rect x="152" y="72" width="8" height="8" rx="1"/>
+                  <rect x="176" y="72" width="8" height="8" rx="1"/>
+                  <rect x="10" y="84" width="8" height="8" rx="1"/>
+                  <rect x="34" y="84" width="8" height="8" rx="1"/>
+                  <rect x="84" y="84" width="8" height="8" rx="1"/>
+                  <rect x="108" y="84" width="8" height="8" rx="1"/>
+                  <rect x="140" y="84" width="8" height="8" rx="1"/>
+                  <rect x="164" y="84" width="8" height="8" rx="1"/>
+                  <rect x="10" y="96" width="8" height="8" rx="1"/>
+                  <rect x="22" y="96" width="8" height="8" rx="1"/>
+                  <rect x="46" y="96" width="8" height="8" rx="1"/>
+                  <rect x="60" y="96" width="8" height="8" rx="1"/>
+                  <rect x="72" y="96" width="8" height="8" rx="1"/>
+                  <rect x="96" y="96" width="8" height="8" rx="1"/>
+                  <rect x="120" y="96" width="8" height="8" rx="1"/>
+                  <rect x="140" y="96" width="8" height="8" rx="1"/>
+                  <rect x="152" y="96" width="8" height="8" rx="1"/>
+                  <rect x="176" y="96" width="8" height="8" rx="1"/>
+                  <rect x="10" y="108" width="8" height="8" rx="1"/>
+                  <rect x="34" y="108" width="8" height="8" rx="1"/>
+                  <rect x="60" y="108" width="8" height="8" rx="1"/>
+                  <rect x="84" y="108" width="8" height="8" rx="1"/>
+                  <rect x="108" y="108" width="8" height="8" rx="1"/>
+                  <rect x="140" y="108" width="8" height="8" rx="1"/>
+                  <rect x="164" y="108" width="8" height="8" rx="1"/>
+                  <rect x="10" y="120" width="8" height="8" rx="1"/>
+                  <rect x="22" y="120" width="8" height="8" rx="1"/>
+                  <rect x="46" y="120" width="8" height="8" rx="1"/>
+                  <rect x="72" y="120" width="8" height="8" rx="1"/>
+                  <rect x="96" y="120" width="8" height="8" rx="1"/>
+                  <rect x="108" y="120" width="8" height="8" rx="1"/>
+                  <rect x="120" y="120" width="8" height="8" rx="1"/>
+                  <rect x="140" y="120" width="8" height="8" rx="1"/>
+                  <rect x="176" y="120" width="8" height="8" rx="1"/>
+                  <rect x="72" y="140" width="8" height="8" rx="1"/>
+                  <rect x="84" y="140" width="8" height="8" rx="1"/>
+                  <rect x="108" y="140" width="8" height="8" rx="1"/>
+                  <rect x="72" y="152" width="8" height="8" rx="1"/>
+                  <rect x="96" y="152" width="8" height="8" rx="1"/>
+                  <rect x="120" y="152" width="8" height="8" rx="1"/>
+                  <rect x="152" y="152" width="8" height="8" rx="1"/>
+                  <rect x="176" y="152" width="8" height="8" rx="1"/>
+                  <rect x="72" y="164" width="8" height="8" rx="1"/>
+                  <rect x="84" y="164" width="8" height="8" rx="1"/>
+                  <rect x="108" y="164" width="8" height="8" rx="1"/>
+                  <rect x="140" y="164" width="8" height="8" rx="1"/>
+                  <rect x="164" y="164" width="8" height="8" rx="1"/>
+                  <rect x="72" y="176" width="8" height="8" rx="1"/>
+                  <rect x="96" y="176" width="8" height="8" rx="1"/>
+                  <rect x="108" y="176" width="8" height="8" rx="1"/>
+                  <rect x="120" y="176" width="8" height="8" rx="1"/>
+                  <rect x="152" y="176" width="8" height="8" rx="1"/>
+                  <rect x="176" y="176" width="8" height="8" rx="1"/>
+                </g>
+                <!-- Center logo hint -->
+                <rect x="88" y="88" width="24" height="24" rx="4" fill="#4F8CFF"/>
+                <text x="100" y="104" text-anchor="middle" font-size="14" fill="white">⚡</text>
+              </svg>
+              <div style="font-size:24px; font-weight:800; color:var(--accent); margin-bottom:4px">฿239.00</div>
+              <div style="font-size:13px; color:var(--text-muted)">PromptPay ID: 0-2345-6789-01-1</div>
+              <div style="margin-top:16px; padding:12px 20px; background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.2); border-radius:var(--radius-md)">
+                <div style="font-size:14px; font-weight:700; color:var(--error)">⏱️ Expires in: <span id="qrTimer">15:00</span></div>
+                <div style="font-size:12px; color:var(--text-muted)">QR code expires after 15 minutes</div>
+              </div>
+            </div>
+            <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px; font-size:14px; color:var(--text-muted)">
+              <div>1️⃣ Open your banking app (KBank, SCB, Bangkok Bank, etc.)</div>
+              <div>2️⃣ Select "Scan QR" or "Pay with QR"</div>
+              <div>3️⃣ Scan the code above</div>
+              <div>4️⃣ Confirm the amount <strong style="color:var(--accent)">฿239.00</strong></div>
+              <div>5️⃣ Press confirm — payment is detected automatically</div>
+            </div>
+          </div>
+
+          <!-- TrueMoney (default selected) -->
+          <div id="detailTruemoney" class="payment-detail-section">
+            <h4 style="margin-bottom:8px">💚 TrueMoney Wallet</h4>
+            <p style="font-size:14px; margin-bottom:20px">Pay using your TrueMoney Wallet balance</p>
+            <div class="input-group" style="margin-bottom:16px">
+              <label class="input-label">TrueMoney Phone Number</label>
+              <div class="input-wrapper">
+                <span class="input-icon">📱</span>
+                <input type="tel" class="input" placeholder="0XX-XXX-XXXX" value="089-123-4567">
+              </div>
+            </div>
+            <div style="background:rgba(16,185,129,.07); border:1px solid rgba(16,185,129,.2); border-radius:var(--radius-md); padding:16px; margin-bottom:20px">
+              <div style="font-weight:700; font-size:14px; color:var(--success)">Wallet Balance Available</div>
+              <div style="font-size:24px; font-weight:800; color:var(--text)">฿1,250.00</div>
+              <div style="font-size:12px; color:var(--text-muted)">After payment: ฿1,011.00 remaining</div>
+            </div>
+          </div>
+
+          <!-- Credit/Debit Card -->
+          <div id="detailCard" class="payment-detail-section" style="display:none">
+            <h4 style="margin-bottom:8px">💳 Credit / Debit Card</h4>
+            <p style="font-size:14px; margin-bottom:20px">Visa, Mastercard, JCB accepted. +1.5% processing fee applies.</p>
+            <div class="card-form">
+              <div class="input-group">
+                <label class="input-label">Card Number</label>
+                <div class="input-wrapper">
+                  <span class="input-icon">💳</span>
+                  <input type="text" class="input" placeholder="1234 5678 9012 3456" maxlength="19" id="cardNum" oninput="formatCard(this)">
+                </div>
+              </div>
+              <div class="input-group">
+                <label class="input-label">Cardholder Name</label>
+                <input type="text" class="input" placeholder="Name as on card">
+              </div>
+              <div class="card-row">
+                <div class="input-group">
+                  <label class="input-label">Expiry Date</label>
+                  <input type="text" class="input" placeholder="MM/YY" maxlength="5">
+                </div>
+                <div class="input-group">
+                  <label class="input-label">CVV</label>
+                  <input type="text" class="input" placeholder="123" maxlength="4">
+                </div>
+              </div>
+              <label class="checkbox-item" style="margin-top:4px">
+                <input type="checkbox">
+                <label style="font-size:13px; color:var(--text-muted)">Save card for faster checkout</label>
+              </label>
+            </div>
+          </div>
+
+          <!-- PayPal -->
+          <div id="detailPaypal" class="payment-detail-section" style="display:none">
+            <h4 style="margin-bottom:8px">🅿️ PayPal</h4>
+            <p style="font-size:14px; margin-bottom:20px">You'll be redirected to PayPal to complete your payment securely. +2% processing fee applies.</p>
+            <div style="display:flex; align-items:center; gap:16px; padding:20px; background:rgba(0,70,153,.1); border:1px solid rgba(0,70,153,.3); border-radius:var(--radius-lg)">
+              <span style="font-size:40px">🅿️</span>
+              <div>
+                <div style="font-weight:700">Connected: user@example.com</div>
+                <div style="font-size:13px; color:var(--text-muted)">Balance: $142.50 USD</div>
+              </div>
+              <div style="margin-left:auto; color:var(--success)">✅</div>
+            </div>
+          </div>
+
+          <!-- Apple Pay -->
+          <div id="detailApple" class="payment-detail-section" style="display:none">
+            <h4 style="margin-bottom:8px">🍎 Apple Pay</h4>
+            <p style="font-size:14px; margin-bottom:20px">Use Face ID or Touch ID to confirm payment instantly.</p>
+            <div style="text-align:center; padding:32px; background:var(--surface-2); border-radius:var(--radius-lg)">
+              <div style="font-size:64px; margin-bottom:16px">🍎</div>
+              <div style="font-size:18px; font-weight:700; margin-bottom:8px">Ready to pay with Apple Pay</div>
+              <div style="font-size:14px; color:var(--text-muted)">You'll be prompted to confirm with Face ID / Touch ID</div>
+            </div>
+          </div>
+
+          <!-- Google Pay -->
+          <div id="detailGoogle" class="payment-detail-section" style="display:none">
+            <h4 style="margin-bottom:8px">🔵 Google Pay</h4>
+            <p style="font-size:14px; margin-bottom:20px">Fast checkout with your Google account. No fees.</p>
+            <div style="text-align:center; padding:32px; background:var(--surface-2); border-radius:var(--radius-lg)">
+              <div style="font-size:64px; margin-bottom:16px">🔵</div>
+              <div style="font-size:18px; font-weight:700; margin-bottom:8px">Google Pay Ready</div>
+              <div style="font-size:14px; color:var(--text-muted)">Tap Pay to authenticate with your Google account</div>
+            </div>
+          </div>
+
+          <!-- Bank Transfer -->
+          <div id="detailBank" class="payment-detail-section" style="display:none">
+            <h4 style="margin-bottom:8px">🏦 Bank Transfer</h4>
+            <p style="font-size:14px; margin-bottom:20px">Transfer to the account below. Order is confirmed after payment verification (1–15 min).</p>
+            <div style="display:flex; flex-direction:column; gap:12px">
+              <div class="summary-row" style="padding:14px 0">
+                <span class="label">Bank</span><span class="value">Kasikorn Bank (KBank)</span>
+              </div>
+              <div class="summary-row" style="padding:14px 0">
+                <span class="label">Account Name</span><span class="value">Legends Topup Co., Ltd.</span>
+              </div>
+              <div class="summary-row" style="padding:14px 0">
+                <span class="label">Account Number</span>
+                <span class="value" style="display:flex;align-items:center;gap:8px">
+                  123-4-56789-0
+                  <button onclick="copyText('123-4-56789-0')" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:13px">📋 Copy</button>
+                </span>
+              </div>
+              <div class="summary-row" style="padding:14px 0">
+                <span class="label">Amount</span><span class="value text-accent">฿239.00</span>
+              </div>
+              <div class="summary-row" style="padding:14px 0">
+                <span class="label">Reference</span>
+                <span class="value" style="display:flex;align-items:center;gap:8px">
+                  LT2024001234
+                  <button onclick="copyText('LT2024001234')" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:13px">📋 Copy</button>
+                </span>
+              </div>
+            </div>
+            <div style="margin-top:20px; background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.25); border-radius:var(--radius-md); padding:14px 16px; font-size:13px; color:var(--warning)">
+              ⚠️ Please include the reference number in your transfer. Upload your slip after payment to speed up verification.
+            </div>
+            <div style="margin-top:16px">
+              <label class="input-label" style="display:block; margin-bottom:8px">Upload Payment Slip (optional)</label>
+              <input type="file" accept="image/*" style="color:var(--text-muted); font-size:13px;">
+            </div>
+          </div>
+
+        </div>
+
+        <!-- PAY BUTTON -->
+        <div style="margin-top:24px">
+          <a href="processing.html" class="btn btn-primary btn-xl w-full" id="payBtn" onclick="handlePay(event)">
+            🔒 Pay Securely — ฿239.00
+          </a>
+          <div style="text-align:center; margin-top:12px; font-size:12px; color:var(--text-muted)">
+            By paying you agree to our <a href="#" style="color:var(--primary)">Terms of Service</a> · Powered by Legends Topup Security
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Order Summary -->
+      <div>
+        <div class="order-summary">
+          <h4 style="margin-bottom:20px">📋 Order Summary</h4>
+
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px">
+            <div style="width:48px; height:48px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0;" class="cover-ml">⚔️</div>
+            <div>
+              <div style="font-weight:700; font-size:14px">Mobile Legends: Bang Bang</div>
+              <div style="font-size:12px; color:var(--text-muted)">MOBA · Global</div>
+            </div>
+          </div>
+
+          <div class="summary-row">
+            <span class="label">Player</span>
+            <span class="value">Hero123 · #456789123</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Package</span>
+            <span class="value">706 💎 Diamonds</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Subtotal</span>
+            <span class="value">฿239</span>
+          </div>
+          <div class="summary-row summary-discount">
+            <span class="label">VIP Discount (2%)</span>
+            <span class="value text-success">-฿4.78</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Processing Fee</span>
+            <span class="value">฿0.00</span>
+          </div>
+          <div class="summary-row total">
+            <span class="label">Total</span>
+            <span class="value">฿234.22</span>
+          </div>
+
+          <div style="margin-top:20px; padding:12px 16px; background:rgba(16,185,129,.07); border:1px solid rgba(16,185,129,.2); border-radius:var(--radius-md);">
+            <div style="font-size:13px; color:var(--success); font-weight:600">⚡ Instant Delivery</div>
+            <div style="font-size:12px; color:var(--text-muted)">Diamonds credited within 60 seconds</div>
+          </div>
+
+          <div style="margin-top:16px; padding:12px 16px; background:rgba(79,140,255,.07); border:1px solid rgba(79,140,255,.15); border-radius:var(--radius-md);">
+            <div style="font-size:13px; font-weight:600; margin-bottom:4px">🏆 You'll earn</div>
+            <div style="font-size:18px; font-weight:800; color:var(--primary)">+239 LT Points</div>
+            <div style="font-size:11px; color:var(--text-muted)">Progress to Silver tier</div>
+          </div>
+
+          <!-- Back button -->
+          <a href="game-detail.html" class="btn btn-ghost w-full" style="margin-top:16px">← Back to Package</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo text-gradient">⚡ Legends Topup</div>
+        <div class="footer-tagline">Thailand's #1 premium game top-up platform.</div>
+        <div class="footer-socials">
+          <a href="#" class="social-btn">𝐟</a>
+          <a href="#" class="social-btn">🟩</a>
+          <a href="#" class="social-btn">💬</a>
+          <a href="#" class="social-btn">𝕏</a>
+        </div>
+      </div>
+      <div><div class="footer-col-title">Quick Links</div><div class="footer-links"><a href="index.html">Home</a><a href="games.html">Games</a><a href="history.html">Orders</a></div></div>
+      <div><div class="footer-col-title">Support</div><div class="footer-links"><a href="#">Help Center</a><a href="#">Live Chat</a></div></div>
+      <div><div class="footer-col-title">Legal</div><div class="footer-links"><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div></div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2024 Legends Topup. All rights reserved.</div>
+      <div class="payment-badges"><div class="payment-badge">PromptPay</div><div class="payment-badge">VISA</div><div class="payment-badge">Mastercard</div><div class="payment-badge">PayPal</div></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Hamburger
+const hamburger = document.getElementById('hamburger');
+const navDrawer = document.getElementById('navDrawer');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('open');
+  navDrawer.classList.toggle('open');
+});
+
+const detailMap = {
+  promptpay: 'detailPromptpay',
+  truemoney: 'detailTruemoney',
+  card: 'detailCard',
+  paypal: 'detailPaypal',
+  apple: 'detailApple',
+  google: 'detailGoogle',
+  bank: 'detailBank'
+};
+
+function selectPayment(card) {
+  document.querySelectorAll('.payment-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  // Hide all detail panels
+  Object.values(detailMap).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  // Show relevant panel
+  const pm = card.dataset.pm;
+  const detail = document.getElementById(detailMap[pm]);
+  if (detail) { detail.style.display = 'block'; }
+  // Update pay button for card fee
+  const payBtn = document.getElementById('payBtn');
+  if (pm === 'card') {
+    payBtn.textContent = '🔒 Pay Securely — ฿242.59 (+1.5%)';
+  } else if (pm === 'paypal') {
+    payBtn.textContent = '🔒 Pay with PayPal — ฿243.98 (+2%)';
+  } else {
+    payBtn.textContent = '🔒 Pay Securely — ฿234.22';
+  }
+}
+
+function handlePay(e) {
+  const btn = document.getElementById('payBtn');
+  btn.style.pointerEvents = 'none';
+  btn.textContent = '⏳ Processing...';
+}
+
+function formatCard(input) {
+  let v = input.value.replace(/\D/g, '').substring(0, 16);
+  input.value = v.replace(/(.{4})/g, '$1 ').trim();
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => showToast('Copied!', 'success'));
+}
+
+// QR countdown timer
+let qrSeconds = 15 * 60;
+function updateQRTimer() {
+  if (qrSeconds <= 0) { document.getElementById('qrTimer').textContent = 'EXPIRED'; return; }
+  const m = Math.floor(qrSeconds / 60);
+  const s = qrSeconds % 60;
+  const el = document.getElementById('qrTimer');
+  if (el) el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  qrSeconds--;
+  setTimeout(updateQRTimer, 1000);
+}
+updateQRTimer();
+
+// Toast
+function showToast(msg, type = 'info') {
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><div class="toast-content"><div class="toast-msg">${msg}</div></div><button class="toast-close" onclick="this.closest('.toast').remove()">✕</button>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 2500);
+}
+</script>
+</body>
+</html>
